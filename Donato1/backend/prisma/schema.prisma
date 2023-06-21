@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Clients {
+  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String   @db.VarChar(30)
+  Orders Orders[]
+}
+
+model Departments {
+  id          String @id      @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description String @unique  @db.VarChar(50)
+}
+
+model Employees {
+  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name    String   @db.VarChar(30)
+  jobs_id String?  @db.Uuid
+  Jobs    Jobs?    @relation(fields: [jobs_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Orders  Orders[]
+}
+
+model Jobs {
+  id          String      @id       @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description String      @unique   @db.VarChar(50)
+  Employees   Employees[]
+}
+
+model Orders {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description  String     @db.VarChar(50)
+  createdAt    DateTime   @default(now())
+  deleteAt     DateTime
+  states_id    String?    @db.Uuid
+  employees_id String?    @db.Uuid
+  clients_id   String?    @db.Uuid
+  Clients      Clients?   @relation(fields: [clients_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Employees    Employees? @relation(fields: [employees_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  States       States?    @relation(fields: [states_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model States {
+  id          String   @id        @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description String   @unique    @db.VarChar(50)
+  Orders      Orders[]
+}
